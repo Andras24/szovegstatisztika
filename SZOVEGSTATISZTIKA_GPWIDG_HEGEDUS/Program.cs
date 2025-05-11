@@ -1,15 +1,28 @@
-namespace SZOVEGSTATISZTIKA_GPWIDG_HEGEDUS
+using SZOVEGSTATISZTIKA_GPWIDG_HEGEDUS.BACKEND.Data;
+using SZOVEGSTATISZTIKA_GPWIDG_HEGEDUS.Data;
+
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Szolgáltatások regisztrálása
+builder.Services.AddControllers();
+builder.Services.AddTransient<ITextStatsService, TextStatsService>();
+
+// CORS engedélyezése a frontend számára
+builder.Services.AddCors(options =>
 {
-    public class Program
+    options.AddDefaultPolicy(policy =>
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
-            var app = builder.Build();
+        policy.AllowAnyOrigin()         // vagy .WithOrigins("http://localhost:5500") ha csak ott fut a frontend
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
-            app.MapGet("/", () => "Hello World!");
+var app = builder.Build();
 
-            app.Run();
-        }
-    }
-}
+app.UseCors(); // CORS middleware
+
+app.MapControllers(); // REST API végpontok engedélyezése
+
+app.Run();
